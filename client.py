@@ -41,7 +41,9 @@ def main():
         if client_message_0 == "read":
             pass
         if client_message_0 == "write":
-            pass
+            content = input()
+            message_recv_from_server = send_to_server(content)
+            print(message_recv_from_server)
         if client_message_0 == "rename":
             pass
         if client_message_0 == "cd":
