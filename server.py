@@ -48,6 +48,14 @@ def writing_into_file(wanted_filename, s_socket, communication_socket, client_ad
         data = "File doesn't exist"
         send_response_to_client(data, communication_socket)
 
+def reading_file(wanted_filename, s_socket, communication_socket, client_address):
+    if wanted_filename in (listing_files_in_folder()):
+        with open(wanted_filename, "r") as f:
+            data = f.read()
+    else:
+        data = "File doesn't exist"
+    send_response_to_client(data, communication_socket)
+
 def main():
 
     host = socket.gethostbyname('localhost')
@@ -79,6 +87,8 @@ def main():
             creating_file(wanted_filename, communication_socket, client_address)
         if client_message_0 == "write":
             writing_into_file(wanted_filename, s_socket, communication_socket, client_address)
+        if client_message_0 == "read":
+            reading_file(wanted_filename, s_socket, communication_socket, client_address)
         
 
 if __name__ == "__main__":

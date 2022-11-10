@@ -39,7 +39,7 @@ def main():
         if client_message_0 == "delete":
             pass
         if client_message_0 == "read":
-            pass
+            print(message_recv_from_server)
         if client_message_0 == "write":
             content = input()
             message_recv_from_server = send_to_server(content)
