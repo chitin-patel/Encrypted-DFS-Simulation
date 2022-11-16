@@ -8,9 +8,7 @@ def send_response_to_client(data, communication_socket):
 
 def listing_files_in_folder():
     directory_path = "."
-
     existing_files = [file for file in os.listdir(directory_path) if os.path.isfile(file) or os.path.isdir(file)]
-
     file_list = ""
     for file in existing_files:
         file_list += file + "\n"
@@ -88,6 +86,14 @@ def main():
         if len(client_message.split()) > 1:
             wanted_filename = client_message.split()[1]
 
+        if client_message_0 == "ls":
+            existing_files = listing_files_in_folder()
+            if existing_files is None:
+                send_response_to_client("No files exist", communication_socket)
+            else:
+                send_response_to_client(existing_files, communication_socket)
+            communication_socket.close()
+            print(f'Communication with {client_address} ended!')
         if client_message_0 == "create":
             creating_file(wanted_filename, communication_socket, client_address)
         if client_message_0 == "write":

@@ -24,7 +24,7 @@ def main():
         message_recv_from_server = send_to_server(client_message)
         client_message_0 = client_message.split()[0]
         if client_message_0 == "ls":
-            pass
+            print("The list of existing files: ", message_recv_from_server)
         if client_message_0 == "create":
             print(message_recv_from_server)
         if client_message_0 == "delete":
