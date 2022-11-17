@@ -29,6 +29,13 @@ def creating_file(wanted_filename, communication_socket, client_address):
     communication_socket.close()
     print(f'Communication with {client_address} ended!')
 
+def deleting_file(wanted_filename, communication_socket, client_address):
+    if wanted_filename in (listing_files_in_folder()):
+        os.remove(wanted_filename)
+        data = "successfully deleted"
+    else:
+        data = "File doesn't exist"
+    send_response_to_client(data, communication_socket)
 
 def writing_into_file(wanted_filename, s_socket, communication_socket, client_address):
     # content = write(filename, communication_socket, server, current_dir)
@@ -96,6 +103,8 @@ def main():
             print(f'Communication with {client_address} ended!')
         if client_message_0 == "create":
             creating_file(wanted_filename, communication_socket, client_address)
+        if client_message_0 == "delete":
+            deleting_file(wanted_filename, communication_socket, client_address)
         if client_message_0 == "write":
             writing_into_file(wanted_filename, s_socket, communication_socket, client_address)
         if client_message_0 == "read":

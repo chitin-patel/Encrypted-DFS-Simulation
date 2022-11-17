@@ -28,7 +28,7 @@ def main():
         if client_message_0 == "create":
             print(message_recv_from_server)
         if client_message_0 == "delete":
-            pass
+             print(message_recv_from_server)
         if client_message_0 == "read":
             print(message_recv_from_server)
         if client_message_0 == "write":
