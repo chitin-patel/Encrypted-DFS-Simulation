@@ -66,6 +66,14 @@ def reading_file(wanted_filename, s_socket, communication_socket, client_address
         data = "File doesn't exist"
     send_response_to_client(data, communication_socket)
 
+def creating_new_directory(wanted_filename, s_socket, communication_socket, client_address):
+    if wanted_filename not in (listing_files_in_folder()):
+        os.mkdir(wanted_filename)
+        send_response_to_client("Directory created successfully", communication_socket)
+    else:
+        send_response_to_client("Directory already exits", communication_socket)
+    communication_socket.close()
+    print(f'Communication with {client_address} ended!')
 
 def main():
     host = socket.gethostbyname('localhost')
@@ -109,7 +117,8 @@ def main():
             writing_into_file(wanted_filename, s_socket, communication_socket, client_address)
         if client_message_0 == "read":
             reading_file(wanted_filename, s_socket, communication_socket, client_address)
-
+        if client_message_0 == "mkdir":
+            creating_new_directory(wanted_filename, s_socket, communication_socket, client_address)
 
 if __name__ == "__main__":
     main()

@@ -40,7 +40,7 @@ def main():
         if client_message_0 == "cd":
             pass
         if client_message_0 == "mkdir":
-            pass
+            print(message_recv_from_server)
 
 
 if __name__ == "__main__":
