@@ -38,7 +38,7 @@ def main():
         if client_message_0 == "rename":
             pass
         if client_message_0 == "cd":
-            pass
+            print(message_recv_from_server)
         if client_message_0 == "mkdir":
             print(message_recv_from_server)
 
