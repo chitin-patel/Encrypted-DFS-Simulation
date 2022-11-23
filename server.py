@@ -68,6 +68,19 @@ def reading_file(wanted_filename, s_socket, communication_socket, client_address
         data = "File doesn't exist"
     send_response_to_client(data, communication_socket)
 
+def renaming_file(wanted_filename,s_socket, communication_socket, client_address):
+    if wanted_filename in (listing_files_in_folder()):
+        with open(wanted_filename, "w") as f:
+            input_filename = "Enter the new name of the file: "
+            send_response_to_client(input_filename, communication_socket)
+            print("waiting for command (IN WRITE)...")
+            communication_socket, client_address = s_socket.accept()
+            new_filename = communication_socket.recv(1024).decode('utf-8')
+            print("Received the new name of the file as: (IN WRITE)", new_filename)
+            os.rename(wanted_filename, new_filename)
+            send_response_to_client("name changed successfully", communication_socket)
+            communication_socket.close()
+            print(f'Communication with {client_address} ended!')
 
 def change_directory(main_dir, wanted_filename, s_socket, communication_socket, client_address):
     if wanted_filename == ".":
@@ -132,6 +145,8 @@ def main():
             deleting_file(wanted_filename, communication_socket, client_address)
         if client_message_0 == "write":
             writing_into_file(wanted_filename, s_socket, communication_socket, client_address)
+        if client_message_0 == "rename":
+            renaming_file(wanted_filename, s_socket, communication_socket, client_address)
         if client_message_0 == "read":
             reading_file(wanted_filename, s_socket, communication_socket, client_address)
         if client_message_0 == "cd":
