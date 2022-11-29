@@ -1,7 +1,14 @@
 import socket
+import time
 
 
-def send_to_server(message):
+def send_to_all_servers(client_message, content):
+    message_recv_from_server1 = send_to_server1(content)
+    message_recv_from_server2 = send_to_server2(client_message, content)
+    return message_recv_from_server1, message_recv_from_server2
+
+
+def send_to_server1(message):
     # HOST = '10.200.137.77'
     # HOST = socket.gethostbyname(socket.gethostname())
     host = socket.gethostbyname('localhost')
@@ -12,32 +19,79 @@ def send_to_server(message):
     message_recv_from_server = None
     if (message.split('|')[0] in ["ls"]) or (
             message.split(' ')[0] in ["create", "read", "cd", "delete", "mkdir", "write", "rename"]):
-        message_recv_from_server = s_socket.recv(1024)
+        message_recv_from_server1 = s_socket.recv(1024)
     s_socket.close()
-    return message_recv_from_server
+    return message_recv_from_server1
+
+
+def send_to_server2(client_message, content):
+    try:
+        # print("attempt to connecting from client")
+        host = socket.gethostbyname('localhost')
+        port = 9091
+        s_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s_socket.connect((host, port))
+        status2 = ('Client Connected to Server2', 'Server2')
+        print(status2[0], status2[1])
+
+        command = client_message + ' | ' + content
+        s_socket.send(command.encode('utf-8'))
+        response = s_socket.recv(1024).decode('utf-8')
+        # if (message.split('|')[0] in ["ls"]) or (message.split(' ')[0] in ["read", "cd", "delete", "mkdir",
+        # "write", "rename"]): response = s_socket.recv(1024).decode('utf-8') else: response = None
+        time.sleep(1)
+        s_socket.close()
+        return response
+    except ConnectionRefusedError:
+        status2 = ('Could not connect to Server2', 'Server2')
+        print(status2[0], status2[1])
+
+
+def send_to_server3(client_message, content):
+    try:
+        host = socket.gethostbyname('localhost')
+        port = 9092
+        s_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s_socket.connect((host, port))
+        status3 = ('Client Connected to Server3', 'Server3')
+        print(status3[0], status3[1])
+        command = client_message + ' | ' + content
+        s_socket.send(command.encode('utf-8'))
+        response = s_socket.recv(1024).decode('utf-8')
+        # if (message.split('|')[0] in ["ls"]) or (message.split(' ')[0] in ["read", "cd", "delete", "mkdir",
+        # "write", "rename"]): response = s_socket.recv(1024).decode('utf-8') else: response = None
+        time.sleep(1)
+        s_socket.close()
+        return response
+    except ConnectionRefusedError:
+        status3 = ('Could not connect to Server3', 'Server3')
+        print(status3[0], status3[1])
 
 
 def main():
     while True:
         print("Hello..")
         client_message = input("Enter the command you want to perform: ")
-        message_recv_from_server = send_to_server(client_message)
+        message_recv_from_server = send_to_server1(client_message)
         client_message_0 = client_message.split()[0]
         if client_message_0 == "ls":
             print("The list of existing files: ", message_recv_from_server)
         if client_message_0 == "create":
+            message_recv_from_server = send_to_server2(client_message, "None")
             print(message_recv_from_server)
         if client_message_0 == "delete":
-             print(message_recv_from_server)
+            message_recv_from_server = send_to_server2(client_message, "None")
+            print(message_recv_from_server)
         if client_message_0 == "read":
+            message_recv_from_server = send_to_server2(client_message, "None")
             print(message_recv_from_server)
         if client_message_0 == "write":
             content = input()
-            message_recv_from_server = send_to_server(content)
+            message_recv_from_server = send_to_all_servers(client_message, content)
             print(message_recv_from_server)
         if client_message_0 == "rename":
             new_name = input()
-            send_to_server(new_name)
+            send_to_server1(new_name)
         if client_message_0 == "cd":
             print(message_recv_from_server)
         if client_message_0 == "mkdir":

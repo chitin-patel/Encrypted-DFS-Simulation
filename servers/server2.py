@@ -39,22 +39,22 @@ def deleting_file(wanted_filename, communication_socket, client_address):
     send_response_to_client(data, communication_socket)
 
 
-def writing_into_file(wanted_filename, s_socket, communication_socket, client_address):
+def writing_into_file(wanted_filename, text, s_socket, communication_socket, client_address):
     # content = write(filename, communication_socket, server, current_dir)
 
     if wanted_filename in (listing_files_in_folder()):
         with open(wanted_filename, "w") as f:
-            data = "enter the text you want to insert: "
-            send_response_to_client(data, communication_socket)
+            # data = "enter the text you want to insert: "
+            # send_response_to_client(data, communication_socket)
 
             print("waiting for command (IN WRITE)...")
-            communication_socket, client_address = s_socket.accept()
-            client_write_data = communication_socket.recv(1024).decode('utf-8')
-            print("Received the content of the file as: (IN WRITE)", client_write_data)
-            f.write(client_write_data)
-            send_response_to_client("successfully written the data", communication_socket)
+            # communication_socket, client_address = s_socket.accept()
+            # client_write_data = communication_socket.recv(1024).decode('utf-8')
+            print("Received the content of the file as: (IN WRITE)", text)
+            f.write(text)
+            communication_socket.send('Got your message for Server2. Thank you!'.encode('utf-8'))
             communication_socket.close()
-            print(f'Communication with {client_address} ended!')
+            print(f'Communication with ended in S2!')
     else:
         data = "File doesn't exist"
         send_response_to_client(data, communication_socket)
@@ -68,7 +68,8 @@ def reading_file(wanted_filename, s_socket, communication_socket, client_address
         data = "File doesn't exist"
     send_response_to_client(data, communication_socket)
 
-def renaming_file(wanted_filename,s_socket, communication_socket, client_address):
+
+def renaming_file(wanted_filename, s_socket, communication_socket, client_address):
     if wanted_filename in (listing_files_in_folder()):
         with open(wanted_filename, "w") as f:
             input_filename = "Enter the new name of the file: "
@@ -81,6 +82,7 @@ def renaming_file(wanted_filename,s_socket, communication_socket, client_address
             send_response_to_client("name changed successfully", communication_socket)
             communication_socket.close()
             print(f'Communication with {client_address} ended!')
+
 
 def change_directory(main_dir, wanted_filename, s_socket, communication_socket, client_address):
     if wanted_filename == ".":
@@ -124,8 +126,10 @@ def main():
         # users exist? or else create new directory
 
         print("Processing the message received from client...")
-        client_message = communication_socket.recv(1024).decode('utf-8')
-        print(f'Message from client is: {client_message}')
+        input_client_message = communication_socket.recv(1024).decode('utf-8')
+        print(f'Message from client is: {input_client_message}')
+
+        client_message, text = input_client_message.split("|")
 
         client_message_0 = client_message.split()[0]
         if len(client_message.split()) > 1:
@@ -144,7 +148,7 @@ def main():
         if client_message_0 == "delete":
             deleting_file(wanted_filename, communication_socket, client_address)
         if client_message_0 == "write":
-            writing_into_file(wanted_filename, s_socket, communication_socket, client_address)
+            writing_into_file(wanted_filename, text, s_socket, communication_socket, client_address)
         if client_message_0 == "rename":
             renaming_file(wanted_filename, s_socket, communication_socket, client_address)
         if client_message_0 == "read":
