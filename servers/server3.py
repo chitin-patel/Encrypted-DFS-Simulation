@@ -20,8 +20,8 @@ def creating_file(wanted_filename, communication_socket, client_address):
 
     if wanted_filename not in (listing_files_in_folder()):
         with open(wanted_filename, "w") as f:
-            print("Created the file in Server 2")
-            data = "Created the file in Server 2"
+            print("Created the file in Server 3")
+            data = "Created the file in Server 3"
             send_response_to_client(data, communication_socket)
     else:
         data = "File already exist"
@@ -52,9 +52,9 @@ def writing_into_file(wanted_filename, text, s_socket, communication_socket, cli
             # client_write_data = communication_socket.recv(1024).decode('utf-8')
             print("Received the content of the file as: (IN WRITE)", text)
             f.write(text)
-            communication_socket.send('Got your message for Server2. Thank you!'.encode('utf-8'))
+            communication_socket.send('Got your message for Server3. Thank you!'.encode('utf-8'))
             communication_socket.close()
-            print(f'Communication with ended in S2!')
+            print(f'Communication with ended in S3!')
     else:
         data = "File doesn't exist"
         send_response_to_client(data, communication_socket)
@@ -115,7 +115,7 @@ def main():
     s_socket.bind((host, port))
     s_socket.listen(5)
     main_dir = os.getcwd()
-    print('Server 2 is listening!......')
+    print('Server 3 is listening!......')
 
     while True:
         communication_socket, client_address = s_socket.accept()
