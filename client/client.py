@@ -1,5 +1,7 @@
 import socket
 import time
+import sys
+import hashlib
 
 
 def send_to_all_servers(client_message, content):
@@ -67,8 +69,16 @@ def send_to_server3(client_message, content):
         status3 = ('Could not connect to Server3', 'Server3')
         print(status3[0], status3[1])
 
+def encrypting_pwd(word):
+
+    result = hashlib.md5(word.encode())
+
+    # printing the equivalent hexadecimal value.
+    # print("The hexadecimal equivalent of hash is : ")
+    return result.hexdigest()
 
 def main():
+
     while True:
         print("Hello..")
         client_message = input("Enter the command you want to perform: ")
