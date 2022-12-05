@@ -2,7 +2,8 @@ import socket
 import time
 import sys
 import hashlib
-
+import getpass
+from configparser import ConfigParser
 
 def send_to_all_servers(client_message, content):
     message_recv_from_server1 = send_to_server1(content)
@@ -78,6 +79,25 @@ def encrypting_pwd(word):
     return result.hexdigest()
 
 def main():
+
+    config = ConfigParser()
+    config.read('auth.ini')
+    username_list = list(config['AUTHENTICATION'])
+    print("username: ", username_list)
+    user_status = 'Not Verified'
+    attempt = 0
+    while user_status == 'Not Verified':
+        username = input("Enter Your Username : ")
+        password_bfr = getpass.getpass("Enter Your Password : ")
+        password = encrypting_pwd(password_bfr)
+        attempt += 1
+        if (username in username_list) and (password == config['AUTHENTICATION'][username]):
+            user_status = 'Verified user'
+        else:
+            print("1 Please enter a valid password.You have " + str(3 - attempt) + " left.")
+        if attempt == 3:
+            print("Your access has been denied. Please try again.")
+            sys.exit()
 
     while True:
         print("Hello..")
