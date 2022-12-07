@@ -6,6 +6,7 @@ import getpass
 from configparser import ConfigParser
 import rsa
 
+
 def send_to_all_servers(client_message, content):
     message_recv_from_server1 = send_data_to_server1(content)
     message_recv_from_server2 = send_to_server2(client_message, content)
@@ -27,6 +28,7 @@ def send_to_server1(message):
     s_socket.close()
     return message_recv_from_server1
 
+
 def send_data_to_server1(content):
     # HOST = '10.200.137.77'
     # HOST = socket.gethostbyname(socket.gethostname())
@@ -41,6 +43,7 @@ def send_data_to_server1(content):
     message_recv_from_server = s_socket.recv(1024)
     s_socket.close()
     return message_recv_from_server
+
 
 def send_to_server2(client_message, content):
     try:
@@ -85,16 +88,32 @@ def send_to_server3(client_message, content):
         status3 = ('Could not connect to Server3', 'Server3')
         print(status3[0], status3[1])
 
-def encrypting_pwd(word):
 
+def encrypting_pwd(word):
     result = hashlib.md5(word.encode())
 
     # printing the equivalent hexadecimal value.
     # print("The hexadecimal equivalent of hash is : ")
     return result.hexdigest()
 
-def main():
 
+def creating_new_user():
+    config = ConfigParser()
+    config.read('auth.ini')
+    username_list = list(config['AUTHENTICATION'])
+    username = input("please enter your new username: ")
+    if username in username_list:
+        print("Error creating new user. user already exists!")
+        sys.exit()
+    pwd = input("please enter your new password: ")
+    enc_pwd = encrypting_pwd(pwd)
+    config.set('AUTHENTICATION', username, enc_pwd)
+
+    with open('auth.ini', 'w') as configfile:
+        config.write(configfile)
+
+#main
+def main():
     global publicKey, privateKey
     publicKey, privateKey = rsa.newkeys(1024)
 
@@ -102,6 +121,10 @@ def main():
     config.read('auth.ini')
     username_list = list(config['AUTHENTICATION'])
     print("username: ", username_list)
+    existing_user = input("Existing user? Y/N: ")
+    if existing_user != 'Y':
+        print('Please create a new user')
+        creating_new_user()
     user_status = 'Not Verified'
     attempt = 0
     while user_status == 'Not Verified':
