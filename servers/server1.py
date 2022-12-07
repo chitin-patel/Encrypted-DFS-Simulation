@@ -1,10 +1,12 @@
 import socket
 import os
-
+import base64
 
 def send_response_to_client(data, communication_socket):
     communication_socket.send(data.encode('utf-8'))
 
+def send_bytedata_to_client(data, communication_socket):
+    communication_socket.send(data)
 
 def listing_files_in_folder():
     directory_path = "."
@@ -49,9 +51,10 @@ def writing_into_file(wanted_filename, s_socket, communication_socket, client_ad
 
             print("waiting for command (IN WRITE)...")
             communication_socket, client_address = s_socket.accept()
-            client_write_data = communication_socket.recv(1024).decode('utf-8')
-            print("Received the content of the file as: (IN WRITE)", client_write_data)
-            f.write(client_write_data)
+            client_write_data = communication_socket.recv(1024)# .decode('utf-8')
+            client_write_data_string = str(base64.b64encode(client_write_data), 'utf-8')
+            print("Received the content of the file as: (IN WRITE)", client_write_data_string)
+            f.write(client_write_data_string)
             send_response_to_client("successfully written the data", communication_socket)
             communication_socket.close()
             print(f'Communication with {client_address} ended!')
@@ -59,14 +62,14 @@ def writing_into_file(wanted_filename, s_socket, communication_socket, client_ad
         data = "File doesn't exist"
         send_response_to_client(data, communication_socket)
 
-
 def reading_file(wanted_filename, s_socket, communication_socket, client_address):
     if wanted_filename in (listing_files_in_folder()):
         with open(wanted_filename, "r") as f:
             data = f.read()
     else:
         data = "File doesn't exist"
-    send_response_to_client(data, communication_socket)
+    data_string = base64.b64decode(data)
+    send_bytedata_to_client(data_string, communication_socket)
 
 def renaming_file(wanted_filename,s_socket, communication_socket, client_address):
     if wanted_filename in (listing_files_in_folder()):

@@ -4,9 +4,10 @@ import sys
 import hashlib
 import getpass
 from configparser import ConfigParser
+import rsa
 
 def send_to_all_servers(client_message, content):
-    message_recv_from_server1 = send_to_server1(content)
+    message_recv_from_server1 = send_data_to_server1(content)
     message_recv_from_server2 = send_to_server2(client_message, content)
     return message_recv_from_server1, message_recv_from_server2
 
@@ -26,6 +27,20 @@ def send_to_server1(message):
     s_socket.close()
     return message_recv_from_server1
 
+def send_data_to_server1(content):
+    # HOST = '10.200.137.77'
+    # HOST = socket.gethostbyname(socket.gethostname())
+    host = socket.gethostbyname('localhost')
+    port = 9090
+    s_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s_socket.connect((host, port))
+    encrypted_content = rsa.encrypt(content.encode(), publicKey)
+    s_socket.send(encrypted_content)
+
+    message_recv_from_server = None
+    message_recv_from_server = s_socket.recv(1024)
+    s_socket.close()
+    return message_recv_from_server
 
 def send_to_server2(client_message, content):
     try:
@@ -80,6 +95,9 @@ def encrypting_pwd(word):
 
 def main():
 
+    global publicKey, privateKey
+    publicKey, privateKey = rsa.newkeys(1024)
+
     config = ConfigParser()
     config.read('auth.ini')
     username_list = list(config['AUTHENTICATION'])
@@ -114,7 +132,8 @@ def main():
             print(message_recv_from_server)
         if client_message_0 == "read":
             message_recv_from_server = send_to_server2(client_message, "None")
-            print(message_recv_from_server)
+            decrypted_message = rsa.decrypt(message_recv_from_server, privateKey)
+            print(decrypted_message)
         if client_message_0 == "write":
             content = input()
             message_recv_from_server = send_to_all_servers(client_message, content)
