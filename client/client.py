@@ -9,8 +9,21 @@ import rsa
 
 def send_to_all_servers(client_message, content):
     message_recv_from_server1 = send_data_to_server1(content)
+    message_recv_from_server2, message_recv_from_server3 = send_to_server_replicas(client_message, content)
+    return message_recv_from_server1, message_recv_from_server2, message_recv_from_server3
+
+
+def send_data_to_all_servers(client_message, content):
+    message_recv_from_server1 = send_data_to_server1(content)
+    message_recv_from_server2 = send_data_to_server2(content)
+    # message_recv_from_server3 = send_data_to_server3(client_message, content)
+    return message_recv_from_server1, message_recv_from_server2, message_recv_from_server3
+
+
+def send_to_server_replicas(client_message, content):
     message_recv_from_server2 = send_to_server2(client_message, content)
-    return message_recv_from_server1, message_recv_from_server2
+    message_recv_from_server3 = send_to_server3(client_message, content)
+    return message_recv_from_server2, message_recv_from_server3
 
 
 def send_to_server1(message):
@@ -68,6 +81,25 @@ def send_to_server2(client_message, content):
         print(status2[0], status2[1])
 
 
+def send_data_to_server2(content):
+    # HOST = '10.200.137.77'
+    # HOST = socket.gethostbyname(socket.gethostname())
+    host = socket.gethostbyname('localhost')
+    port = 9091
+    s_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s_socket.connect((host, port))
+    status2 = ('Client Connected to Server2', 'Server2')
+    print(status2[0], status2[1])
+
+    encrypted_content = rsa.encrypt(content.encode(), publicKey)
+    s_socket.send(encrypted_content)
+
+    message_recv_from_server = None
+    message_recv_from_server2 = s_socket.recv(1024)
+    s_socket.close()
+    return message_recv_from_server2
+
+
 def send_to_server3(client_message, content):
     try:
         host = socket.gethostbyname('localhost')
@@ -79,14 +111,33 @@ def send_to_server3(client_message, content):
         command = client_message + ' | ' + content
         s_socket.send(command.encode('utf-8'))
         response = s_socket.recv(1024).decode('utf-8')
-        # if (message.split('|')[0] in ["ls"]) or (message.split(' ')[0] in ["read", "cd", "delete", "mkdir",
-        # "write", "rename"]): response = s_socket.recv(1024).decode('utf-8') else: response = None
+        # if (message.split('|')[0] in ["ls"]) or (message.split(' ')[0] in ["read", "cd", "delete", "mkdir","write",
+        # "rename"]): response = s_socket.recv(1024).decode('utf-8') else: response = None
         time.sleep(1)
         s_socket.close()
         return response
     except ConnectionRefusedError:
         status3 = ('Could not connect to Server3', 'Server3')
         print(status3[0], status3[1])
+
+
+def send_data_to_server3(content):
+    # HOST = '10.200.137.77'
+    # HOST = socket.gethostbyname(socket.gethostname())
+    host = socket.gethostbyname('localhost')
+    port = 9092
+    s_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s_socket.connect((host, port))
+    status2 = ('Client Connected to Server3', 'Server3')
+    print(status2[0], status2[1])
+
+    encrypted_content = rsa.encrypt(content.encode(), publicKey)
+    s_socket.send(encrypted_content)
+
+    message_recv_from_server = None
+    message_recv_from_server3 = s_socket.recv(1024)
+    s_socket.close()
+    return message_recv_from_server3
 
 
 def encrypting_pwd(word):
@@ -112,7 +163,8 @@ def creating_new_user():
     with open('auth.ini', 'w') as configfile:
         config.write(configfile)
 
-#main
+
+# main
 def main():
     global publicKey, privateKey
     publicKey, privateKey = rsa.newkeys(1024)
@@ -148,17 +200,18 @@ def main():
         if client_message_0 == "ls":
             print("The list of existing files: ", message_recv_from_server)
         if client_message_0 == "create":
-            message_recv_from_server = send_to_server2(client_message, "None")
-            print(message_recv_from_server)
+            message_recv_from_server2, message_recv_from_server3 = send_to_server_replicas(client_message, "None")
+            # message_recv_from_server = send_to_server2(client_message, "None")
+            print(message_recv_from_server2, message_recv_from_server3)
         if client_message_0 == "delete":
             message_recv_from_server = send_to_server2(client_message, "None")
             print(message_recv_from_server)
         if client_message_0 == "read":
-            message_recv_from_server = send_to_server2(client_message, "None")
+            message_recv_from_server2, message_recv_from_server3 = send_to_server_replicas(client_message, "None")
             decrypted_message = rsa.decrypt(message_recv_from_server, privateKey)
             print(decrypted_message)
         if client_message_0 == "write":
-            content = input()
+            content = input("enter the text you want to insert: ")
             message_recv_from_server = send_to_all_servers(client_message, content)
             print(message_recv_from_server)
         if client_message_0 == "rename":

@@ -20,7 +20,7 @@ def creating_file(wanted_filename, communication_socket, client_address):
 
     if wanted_filename not in (listing_files_in_folder()):
         with open(wanted_filename, "w") as f:
-            print("Created the file in Server 3")
+            print("Created the file in Server 3 /n")
             data = "Created the file in Server 3"
             send_response_to_client(data, communication_socket)
     else:
@@ -110,7 +110,7 @@ def creating_new_directory(wanted_filename, s_socket, communication_socket, clie
 def main():
     host = socket.gethostbyname('localhost')
     # host = '130.85.243.2'
-    port = 9090
+    port = 9092
     s_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s_socket.bind((host, port))
     s_socket.listen(5)

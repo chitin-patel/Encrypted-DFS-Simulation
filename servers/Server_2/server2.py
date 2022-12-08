@@ -1,3 +1,4 @@
+import base64
 import socket
 import os
 
@@ -20,7 +21,7 @@ def creating_file(wanted_filename, communication_socket, client_address):
 
     if wanted_filename not in (listing_files_in_folder()):
         with open(wanted_filename, "w") as f:
-            print("Created the file in Server 2")
+            print("Created the file in Server 2 /n")
             data = "Created the file in Server 2"
             send_response_to_client(data, communication_socket)
     else:
@@ -51,6 +52,7 @@ def writing_into_file(wanted_filename, text, s_socket, communication_socket, cli
             # communication_socket, client_address = s_socket.accept()
             # client_write_data = communication_socket.recv(1024).decode('utf-8')
             print("Received the content of the file as: (IN WRITE)", text)
+            # client_write_data_string = str(base64.b64encode(text), 'utf-8')
             f.write(text)
             communication_socket.send('Got your message for Server2. Thank you!'.encode('utf-8'))
             communication_socket.close()
@@ -110,7 +112,7 @@ def creating_new_directory(wanted_filename, s_socket, communication_socket, clie
 def main():
     host = socket.gethostbyname('localhost')
     # host = '130.85.243.2'
-    port = 9090
+    port = 9091
     s_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s_socket.bind((host, port))
     s_socket.listen(5)
