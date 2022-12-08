@@ -17,7 +17,7 @@ def send_data_to_all_servers(client_message, content):
     message_recv_from_server1 = send_data_to_server1(content)
     message_recv_from_server2 = send_data_to_server2(content)
     # message_recv_from_server3 = send_data_to_server3(client_message, content)
-    return message_recv_from_server1, message_recv_from_server2, message_recv_from_server3
+    return message_recv_from_server1, message_recv_from_server2 # , message_recv_from_server3
 
 
 def send_to_server_replicas(client_message, content):
@@ -34,9 +34,11 @@ def send_to_server1(message):
     s_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s_socket.connect((host, port))
     s_socket.send(message.encode('utf-8'))
-    message_recv_from_server = None
+    message_recv_from_server1 = None
     if (message.split('|')[0] in ["ls"]) or (
-            message.split(' ')[0] in ["create", "read", "cd", "delete", "mkdir", "write", "rename"]):
+            message.split(' ')[0] in ["create", "cd", "delete", "mkdir", "write", "rename"]):
+        message_recv_from_server1 = s_socket.recv(1024).decode('utf-8')
+    elif message.split(' ')[0] in ["read"]:
         message_recv_from_server1 = s_socket.recv(1024)
     s_socket.close()
     return message_recv_from_server1
@@ -199,28 +201,31 @@ def main():
         client_message_0 = client_message.split()[0]
         if client_message_0 == "ls":
             print("The list of existing files: ", message_recv_from_server)
+            message_recv_from_server2, message_recv_from_server3 = send_to_server_replicas(client_message, "None")
         if client_message_0 == "create":
             message_recv_from_server2, message_recv_from_server3 = send_to_server_replicas(client_message, "None")
             # message_recv_from_server = send_to_server2(client_message, "None")
             print(message_recv_from_server2, message_recv_from_server3)
         if client_message_0 == "delete":
-            message_recv_from_server = send_to_server2(client_message, "None")
-            print(message_recv_from_server)
+            message_recv_from_server2, message_recv_from_server3 = send_to_server_replicas(client_message, "None")
+            print(message_recv_from_server2, message_recv_from_server3)
         if client_message_0 == "read":
             message_recv_from_server2, message_recv_from_server3 = send_to_server_replicas(client_message, "None")
-            decrypted_message = rsa.decrypt(message_recv_from_server, privateKey)
+            decrypted_message = (rsa.decrypt(message_recv_from_server, privateKey)).decode('utf-8')
             print(decrypted_message)
         if client_message_0 == "write":
             content = input("enter the text you want to insert: ")
             message_recv_from_server = send_to_all_servers(client_message, content)
             print(message_recv_from_server)
         if client_message_0 == "rename":
-            new_name = input()
-            send_to_server1(new_name)
+            new_filename = input("Enter the new name of the file: ")
+            send_to_server1(new_filename)
+            message_recv_from_server = send_to_server_replicas(client_message, new_filename)
         if client_message_0 == "cd":
+            message_recv_from_server = send_to_server_replicas(client_message, "None")
             print(message_recv_from_server)
         if client_message_0 == "mkdir":
-            print(message_recv_from_server)
+            message_recv_from_server = send_to_server_replicas(client_message, "None")
 
 
 if __name__ == "__main__":

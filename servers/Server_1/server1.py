@@ -1,6 +1,7 @@
 import socket
 import os
 import base64
+import rsa
 
 
 def send_response_to_client(data, communication_socket):
@@ -83,7 +84,7 @@ def renaming_file(wanted_filename, s_socket, communication_socket, client_addres
             send_response_to_client(input_filename, communication_socket)
             print("waiting for command (IN WRITE)...")
             communication_socket, client_address = s_socket.accept()
-            new_filename = communication_socket.recv(1024).decode('utf-8')
+            new_filename = (communication_socket.recv(1024).decode('utf-8'))
             print("Received the new name of the file as: (IN WRITE)", new_filename)
             os.rename(wanted_filename, new_filename)
             send_response_to_client("name changed successfully", communication_socket)
