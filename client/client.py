@@ -15,9 +15,9 @@ def send_to_all_servers(client_message, content):
 
 def send_data_to_all_servers(client_message, content):
     message_recv_from_server1 = send_data_to_server1(content)
-    message_recv_from_server2 = send_data_to_server2(content)
-    # message_recv_from_server3 = send_data_to_server3(client_message, content)
-    return message_recv_from_server1, message_recv_from_server2 # , message_recv_from_server3
+    message_recv_from_server2 = send_data_to_server2(client_message, content)
+    message_recv_from_server3 = send_data_to_server3(client_message, content)
+    return message_recv_from_server1, message_recv_from_server2, message_recv_from_server3
 
 
 def send_to_server_replicas(client_message, content):
@@ -161,6 +161,7 @@ def creating_new_user():
     pwd = input("please enter your new password: ")
     enc_pwd = encrypting_pwd(pwd)
     config.set('AUTHENTICATION', username, enc_pwd)
+    # config.add_section(username)
 
     with open('auth.ini', 'w') as configfile:
         config.write(configfile)
@@ -179,6 +180,8 @@ def main():
     if existing_user != 'Y':
         print('Please create a new user')
         creating_new_user()
+        print('User created successfully')
+        sys.exit()
     user_status = 'Not Verified'
     attempt = 0
     while user_status == 'Not Verified':
@@ -195,37 +198,48 @@ def main():
             sys.exit()
 
     while True:
-        print("Hello..")
+        print("Hello..", username)
         client_message = input("Enter the command you want to perform: ")
-        message_recv_from_server = send_to_server1(client_message)
+        message_recv_from_server = send_to_server1(client_message + '|' + username)
         client_message_0 = client_message.split()[0]
+        if len(client_message.split()) > 1:
+            wanted_filename = client_message.split()[1]
         if client_message_0 == "ls":
             print("The list of existing files: ", message_recv_from_server)
-            message_recv_from_server2, message_recv_from_server3 = send_to_server_replicas(client_message, "None")
+            message_recv_from_server2, message_recv_from_server3 = send_to_server_replicas(
+                client_message + '|' + username, "None")
         if client_message_0 == "create":
-            message_recv_from_server2, message_recv_from_server3 = send_to_server_replicas(client_message, "None")
+            message_recv_from_server2, message_recv_from_server3 = send_to_server_replicas(
+                client_message + '|' + username, "None")
+
+            """config.set(username, wanted_filename, "true")
+            with open('auth.ini', 'w') as configfile:
+                config.write(configfile)"""
+
             # message_recv_from_server = send_to_server2(client_message, "None")
             print(message_recv_from_server2, message_recv_from_server3)
         if client_message_0 == "delete":
-            message_recv_from_server2, message_recv_from_server3 = send_to_server_replicas(client_message, "None")
+            message_recv_from_server2, message_recv_from_server3 = send_to_server_replicas(
+                client_message + '|' + username, "None")
             print(message_recv_from_server2, message_recv_from_server3)
         if client_message_0 == "read":
-            message_recv_from_server2, message_recv_from_server3 = send_to_server_replicas(client_message, "None")
+            message_recv_from_server2, message_recv_from_server3 = send_to_server_replicas(
+                client_message + '|' + username, "None")
             decrypted_message = (rsa.decrypt(message_recv_from_server, privateKey)).decode('utf-8')
             print(decrypted_message)
         if client_message_0 == "write":
             content = input("enter the text you want to insert: ")
-            message_recv_from_server = send_to_all_servers(client_message, content)
+            message_recv_from_server = send_to_all_servers(client_message + '|' + username, content)
             print(message_recv_from_server)
         if client_message_0 == "rename":
             new_filename = input("Enter the new name of the file: ")
             send_to_server1(new_filename)
-            message_recv_from_server = send_to_server_replicas(client_message, new_filename)
+            message_recv_from_server = send_to_server_replicas(client_message + '|' + username, new_filename)
         if client_message_0 == "cd":
-            message_recv_from_server = send_to_server_replicas(client_message, "None")
+            message_recv_from_server = send_to_server_replicas(client_message + '|' + username, "None")
             print(message_recv_from_server)
         if client_message_0 == "mkdir":
-            message_recv_from_server = send_to_server_replicas(client_message, "None")
+            message_recv_from_server = send_to_server_replicas(client_message + '|' + username, "None")
 
 
 if __name__ == "__main__":

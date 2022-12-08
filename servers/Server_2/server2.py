@@ -1,4 +1,5 @@
 import base64
+import datetime
 import socket
 import os
 
@@ -33,9 +34,12 @@ def creating_file(wanted_filename, communication_socket, client_address):
 
 def deleting_file(wanted_filename, communication_socket, client_address):
     if wanted_filename in (listing_files_in_folder()):
+        print(listing_files_in_folder())
+        print("os path: ", os.path, "filename: ", wanted_filename)
         os.remove(wanted_filename)
         data = "successfully deleted"
     else:
+        print(listing_files_in_folder())
         data = "File doesn't exist"
     send_response_to_client(data, communication_socket)
 
@@ -109,6 +113,12 @@ def creating_new_directory(wanted_filename, s_socket, communication_socket, clie
     print(f'Communication with {client_address} ended!')
 
 
+def logging_activity(command_name, message, user_name, current_dir):
+    ct = str(datetime.datetime.now())
+    with open(current_dir + "/server_logs", "a") as f:
+        f.write(ct + " | " + "Command : " + command_name + " | " + message + "| Username: " + user_name + "\n")
+
+
 def main():
     host = socket.gethostbyname('localhost')
     # host = '130.85.243.2'
@@ -131,7 +141,7 @@ def main():
         input_client_message = communication_socket.recv(1024).decode('utf-8')
         print(f'Message from client is: {input_client_message}')
 
-        client_message, text = input_client_message.split("|")
+        client_message, user, text = input_client_message.split("|")
 
         client_message_0 = client_message.split()[0]
         if len(client_message.split()) > 1:
@@ -147,14 +157,19 @@ def main():
             print(f'Communication with {client_address} ended!')
         if client_message_0 == "create":
             creating_file(wanted_filename, communication_socket, client_address)
+            logging_activity(client_message_0, wanted_filename, user, main_dir)
         if client_message_0 == "delete":
             deleting_file(wanted_filename, communication_socket, client_address)
+            logging_activity(client_message_0, wanted_filename, user, main_dir)
         if client_message_0 == "write":
             writing_into_file(wanted_filename, text, s_socket, communication_socket, client_address)
+            logging_activity(client_message_0, wanted_filename, user, main_dir)
         if client_message_0 == "rename":
-            renaming_file(wanted_filename, text, s_socket, communication_socket, client_address)
+            renaming_file(wanted_filename, text.replace(" ", ""), s_socket, communication_socket, client_address)
+            logging_activity(client_message_0, wanted_filename, user, main_dir)
         if client_message_0 == "read":
             reading_file(wanted_filename, s_socket, communication_socket, client_address)
+            logging_activity(client_message_0, wanted_filename, user, main_dir)
         if client_message_0 == "cd":
             change_directory(main_dir, ".", s_socket, communication_socket, client_address)
         if client_message_0 == "mkdir":
