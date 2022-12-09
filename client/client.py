@@ -5,19 +5,19 @@ import hashlib
 import getpass
 from configparser import ConfigParser
 import rsa
+import base64
 
 
 def send_to_all_servers(client_message, content):
     message_recv_from_server1 = send_data_to_server1(content)
-    message_recv_from_server2, message_recv_from_server3 = send_to_server_replicas(client_message, content)
+    message_recv_from_server2, message_recv_from_server3 = send_data_to_all_servers(client_message, content)
     return message_recv_from_server1, message_recv_from_server2, message_recv_from_server3
 
 
 def send_data_to_all_servers(client_message, content):
-    message_recv_from_server1 = send_data_to_server1(content)
     message_recv_from_server2 = send_data_to_server2(client_message, content)
     message_recv_from_server3 = send_data_to_server3(client_message, content)
-    return message_recv_from_server1, message_recv_from_server2, message_recv_from_server3
+    return message_recv_from_server2, message_recv_from_server3
 
 
 def send_to_server_replicas(client_message, content):
@@ -83,7 +83,7 @@ def send_to_server2(client_message, content):
         print(status2[0], status2[1])
 
 
-def send_data_to_server2(content):
+def send_data_to_server2(client_message, content):
     # HOST = '10.200.137.77'
     # HOST = socket.gethostbyname(socket.gethostname())
     host = socket.gethostbyname('localhost')
@@ -94,8 +94,9 @@ def send_data_to_server2(content):
     print(status2[0], status2[1])
 
     encrypted_content = rsa.encrypt(content.encode(), publicKey)
-    s_socket.send(encrypted_content)
-
+    encrypted_content_string = str(base64.b64encode(encrypted_content), 'utf-8')
+    command = client_message + ' | ' + encrypted_content_string
+    s_socket.send(command.encode('utf-8'))
     message_recv_from_server = None
     message_recv_from_server2 = s_socket.recv(1024)
     s_socket.close()
@@ -123,7 +124,7 @@ def send_to_server3(client_message, content):
         print(status3[0], status3[1])
 
 
-def send_data_to_server3(content):
+def send_data_to_server3(client_message, content):
     # HOST = '10.200.137.77'
     # HOST = socket.gethostbyname(socket.gethostname())
     host = socket.gethostbyname('localhost')
@@ -134,8 +135,9 @@ def send_data_to_server3(content):
     print(status2[0], status2[1])
 
     encrypted_content = rsa.encrypt(content.encode(), publicKey)
-    s_socket.send(encrypted_content)
-
+    encrypted_content_string = str(base64.b64encode(encrypted_content), 'utf-8')
+    command = client_message + ' | ' + encrypted_content_string
+    s_socket.send(command.encode('utf-8'))
     message_recv_from_server = None
     message_recv_from_server3 = s_socket.recv(1024)
     s_socket.close()
