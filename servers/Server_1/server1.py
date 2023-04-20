@@ -23,6 +23,7 @@ def listing_files_in_folder():
 
 
 def creating_file(wanted_filename, communication_socket, client_address):
+    # content = write(filename, communication_socket, server, current_dir)
 
     if wanted_filename not in (listing_files_in_folder()):
         with open(wanted_filename, "w") as f:
